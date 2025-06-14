@@ -1,10 +1,5 @@
 package com.miapp.webviewapp
-import android.os.Bundle
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
 
-class MainActivity : AppCompatActivity() {
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -16,24 +11,22 @@ class MainActivity : AppCompatActivity() {
 
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private val FILE_CHOOSER_REQUEST_CODE = 1001
+    private lateinit var webView: WebView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val webView: WebView = findViewById(R.id.webview)
-        webView.webViewClient = WebViewClient()
-        webView.settings.javaScriptEnabled = true
-        webView.loadUrl("https://comparte.vercel.app")
-    }
-}
+        webView = findViewById(R.id.webview)
 
         val webSettings = webView.settings
         webSettings.javaScriptEnabled = true
         webSettings.allowFileAccess = true
         webSettings.domStorageEnabled = true
 
+        webView.webViewClient = WebViewClient()
+
         webView.webChromeClient = object : WebChromeClient() {
-            // Soporte para input type="file"
             override fun onShowFileChooser(
                 webView: WebView?,
                 filePathCallback: ValueCallback<Array<Uri>>,
@@ -43,26 +36,28 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.filePathCallback = filePathCallback
 
                 val intent = fileChooserParams.createIntent()
-                try {
+                return try {
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE)
+                    true
                 } catch (e: Exception) {
                     this@MainActivity.filePathCallback = null
-                    return false
+                    false
                 }
-                return true
             }
         }
 
-        webView.webViewClient = WebViewClient()
         webView.loadUrl("https://comparte.vercel.app")
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        super.onActivityResult(requestCode, resultCode, intent)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
-            val result = if (resultCode == Activity.RESULT_OK && intent != null) {
-                WebChromeClient.FileChooserParams.parseResult(resultCode, intent)
-            } else null
+            val result = if (resultCode == Activity.RESULT_OK && data != null) {
+                WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+            } else {
+                null
+            }
             filePathCallback?.onReceiveValue(result)
             filePathCallback = null
         }
