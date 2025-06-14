@@ -1,7 +1,5 @@
 <resources>
-    <string name="app_name">comparte</string>
     <string name="app_name">Comparte</string>
     <string name="activity_name">Comparte</string>
     <string name="launcher_name">Comparte</string>
-    (Primer commit con versión funcional lista para Codemagic)
 </resources>
